@@ -136,6 +136,11 @@ func validateHTTPRequestOperand(term *ast.Term, pos int) (ast.Object, error) {
 // Adds custom headers to a new HTTP request.
 func addHeaders(req *http.Request, headers map[string]interface{}) (bool, error) {
 	for k, v := range headers {
+		if http.CanonicalHeaderKey(k) == "Host" {
+			req.Host = v.(string)
+			continue
+		}
+
 		// Type assertion
 		header, ok := v.(string)
 		if ok {
