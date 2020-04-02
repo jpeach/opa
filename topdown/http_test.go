@@ -972,6 +972,44 @@ func TestHTTPSClient(t *testing.T) {
 		runTopDownTestCase(t, data, "http.send", rule, resultObj.String())
 	})
 
+	t.Run("HTTPS Get with Inline Cert", func(t *testing.T) {
+		// expected result
+		expectedResult := map[string]interface{}{
+			"status":      "200 OK",
+			"status_code": http.StatusOK,
+			"body":        nil,
+			"raw_body":    "",
+		}
+
+		resultObj, err := ast.InterfaceToValue(expectedResult)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ca, err := ioutil.ReadFile(localCaFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		cert, err := ioutil.ReadFile(localClientCertFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		key, err := ioutil.ReadFile(localClientKeyFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		data := loadSmallTestData()
+		rule := []string{fmt.Sprintf(
+			"p = x { http.send({`method`: `get`, `url`: `%s`, `tls_ca_cert`: `%s`, `tls_client_cert`: `%s`, `tls_client_key`: `%s`}, x) }",
+			s.URL, ca, cert, key)}
+
+		// run the test
+		runTopDownTestCase(t, data, "http.send", rule, resultObj.String())
+	})
+
 	t.Run("HTTPS Get with File Cert", func(t *testing.T) {
 		// expected result
 		expectedResult := map[string]interface{}{
